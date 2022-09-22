@@ -7,20 +7,37 @@ const cart = [
     {id: 1, product: 'computer', price: 200, quantity: 1}
 ];
 
+// const getId = (req: Request): number => Number.parseInt(req.params.id);
+// const getNextId = (items: any[]) => 
+// items.reduce((prev, curr) => Math.max(prev.id, curr.id), {id: -1}) + 1;
+
 let currentId = 1;
 
 routes.get('/carts', (req, res) => {
-    const maxPrice = req.query['max price'];
+    const maxPrice = Number.parseInt(req.query.maxPrice as string);
+    const pageSize = Number.parseInt(req.query.pageSize as string);
+    const prefix = req.query.prefix as string;
+
+    let tempArray = cart;
 
     if (maxPrice) {
-        const isMaxPrice = cart.filter(cartItem => {
-            return cartItem.price <= 200;
-        });
-        res.json(isMaxPrice);
-    } else {
-        res.status(200);
-        res.json(cart);
+        tempArray = tempArray.filter((carts) => 
+            carts.price <= maxPrice);
     }
+
+    if (pageSize){
+        if(pageSize < tempArray.length){
+            tempArray = tempArray.slice(0, pageSize);
+        }
+    }
+
+    if (prefix){
+        tempArray = tempArray.filter((carts) => 
+            carts.product.startsWith(prefix)
+        );
+    }
+
+    res.status(200).json(tempArray);
 });
 
 
@@ -54,12 +71,12 @@ routes.post('/carts', (req, res) => {
 });
 
 //Update Cart Object
-routes.put('cart/:id', (req, res) => {
+routes.put('/carts/:id', (req, res) => {
     let newCartItem = req.body;
     let id = Number.parseInt(req.params.id);
 
-    let index = cart.findIndex((cartItem) => {
-        return cartItem.id === id;
+    let index = cart.findIndex((newCartItem) => {
+        return newCartItem.id === id;
     });
 
     if(index > 0) {
@@ -74,11 +91,11 @@ routes.put('cart/:id', (req, res) => {
 });
 
 //Delete Cart Object
-routes.delete('cart/:id', (req, res) => {
+routes.delete('/carts/:id', (req, res) => {
     let id = Number.parseInt(req.params.id);
 
-    const index = cart.findIndex(cartItem => {
-        return cartItem.id === id;
+    const index = cart.findIndex((newCartItem) => {
+        return newCartItem.id === id;
     });
 
     if (index >= 0){
